@@ -1,16 +1,17 @@
 ---
 title: "STAT 331 Portfolio"
-author: "Your Name Goes Here"
+author: "Davis Morales"
 format: html 
 embed-resources: true
 layout: margin-left
 editor: visual
+toc: true
 execute: 
   eval: false
   echo: true
 ---
 
-[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_\_.
+[**My Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an A.
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -22,21 +23,29 @@ execute:
 
 ```{r}
 #| label: wd-1-csv-1
-
+# Lab 2 ; Problem 1
+surveys <- read_csv(here::here("Week 2", "Lab 2", "surveys.csv"))
 ```
 
 -   `csv` Example 2
 
 ```{r}
 #| label: wd-1-csv-2
-
+# Lab 3 ; Problem 2
+evaluations <- read_csv(here::here("Week 3", "Lab 3", "teacher_evals.csv"))
 ```
 
 -   `xlsx`
 
 ```{r}
 #| label: wd-1-xlsx
-
+# Practice Activity 4 ; Problem 1
+military <- read_xlsx("gov_spending_per_capita.xlsx",
+                      sheet = "Share of Govt. spending",
+                      skip  = 7,
+                      n_max = 190,
+                      na = c('xxx', '..', '. .')
+                      )
 ```
 
 **WD-2: I can select necessary columns from a dataset.**
@@ -45,21 +54,47 @@ execute:
 
 ```{r}
 #| label: wd-2-ex-1
-
+# Lab 3 ; Problem 8
+teacher_evals_clean |>
+  filter(if_any(everything(), is.na)) |>
+  select(course_id, teacher_id, percent_failed_cur)
 ```
 
 -   Example removing specified columns
 
 ```{r}
-#| label: wd-2-ex-2
-
+#| label: wd-2-ex-
+# Lab 3 ; Problem 5
+# Portfolio Revision: previously selected the columns I wanted to keep, but now I'm removing the columns I don't want to keep
+teacher_evals_clean <- evaluations |>
+  rename(sex = gender) |>
+  mutate(teacher_id = as.character(teacher_id)) |>
+  filter(no_participants >= 10) |>
+  select(-stud_grade_avg, -stud_grade_std, -stud_grade_var_coef, -percent_failed, -stud_grade_avg_cur, -stud_grade_std_cur, -stud_grade_var_coef_cur, -class_duration, -weekday, -time_of_day, -SET_score_1sem, -maximum_score)
 ```
 
 -   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`)
 
 ```{r}
 #| label: wd-2-ex-3
-
+# Lab 4 ; Problem 7
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 **WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
@@ -68,35 +103,85 @@ execute:
 
 ```{r}
 #| label: wd-3-numeric-ex-1
-
+# Lab 3 ; Problem 5
+median_income_region <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarize(median_income = median(mhi_2018, na.rm = TRUE)) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_glue = "median_income_{study_year}"
+  ) |>
+  arrange(desc(median_income_2018))
+median_income_region
 ```
 
 -   Numeric Example 2
 
 ```{r}
-#| label: wd-3-numeric-ex-1
-
+#| label: wd-3-numeric-ex-2
+# Challenge 3 ; Problem 1
+teacher_evals_comparison <- evaluations |>
+  filter(question_no == 903) |>
+  mutate(
+    set_level = case_when(
+      SET_score_avg >= 4 ~ "excellent",
+      TRUE ~ "standard"
+    ),
+    sen_level = case_when(
+      seniority <= 4 ~ "junior",
+      seniority <= 8 ~ "senior",
+      TRUE ~ "very senior"
+    )
+  ) |>
+  select(course_id, set_level, sen_level)
 ```
 
 -   Character Example 1 (any context)
 
 ```{r}
 #| label: wd-3-character
-
+# Lab 5 ; Problem 2
+inspected_person <- person |>
+  filter(
+    (address_street_name == "Northwestern Dr" &
+       address_number == max(address_number[address_street_name == "Northwestern Dr"])) |
+    (address_street_name == "Franklin Ave" &
+       str_detect(name, pattern = "Annabel"))
+  )
+inspected_person
 ```
 
 -   Character Example 2 (example must use functions from **stringr**)
 
 ```{r}
 #| label: wd-3-string
-
+# Lab 5 ; Problem 7
+insepected_drivers_license <- drivers_license |>
+  filter(
+    id %in% c(173289, 423327),
+    str_detect(plate_number, pattern = "H42W")
+  )
+insepected_drivers_license
 ```
 
 -   Date (example must use functions from **lubridate**)
 
 ```{r}
 #| label: wd-3-date
-
+# Lab 5 ; Problem 5
+# Portfolio Revision: previously filtered "check_in_date" based on character, but now I filter it based on ymd
+insepected_get_fit_now_check_in <- get_fit_now_check_in |>
+  mutate(
+    date = ymd(as.character(check_in_date))
+  ) |>
+  filter(
+    membership_id %in% c("48Z7A", "48Z55"),
+    date == ymd("20180109")
+  )
+insepected_get_fit_now_check_in
 ```
 
 **WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
@@ -105,42 +190,129 @@ execute:
 
 ```{r}
 #| label: wd-4-numeric-ex-1
-
+# Challenge 3 ; Problem 1
+teacher_evals_comparison <- evaluations |>
+  filter(question_no == 903) |>
+  mutate(
+    set_level = case_when(
+      SET_score_avg >= 4 ~ "excellent",
+      TRUE ~ "standard"
+    ),
+    sen_level = case_when(
+      seniority <= 4 ~ "junior",
+      seniority <= 8 ~ "senior",
+      TRUE ~ "very senior"
+    )
+  ) |>
+select(course_id, set_level, sen_level)
 ```
 
 -   Numeric Example 2
 
 ```{r}
 #| label: wd-4-numeric-ex-2
-
+# Challenge 4 ; Problem "Summary Statistics"
+regional_summary <- ca_childcare |>
+  select(region, pr_f, mcsa, mfccsa) |>
+  group_by(region) |>
+  summarize(
+    `Average Poverty Rate (%)` = mean(pr_f, na.rm = TRUE),
+    `Avg Center-Based Cost ($)` = mean(mcsa, na.rm = TRUE),
+    `Avg Family (In-Home) Cost ($)` = mean(mfccsa, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(`Average Poverty Rate (%)`)
+regional_summary
 ```
 
 -   Factor Example 1 (renaming levels)
 
 ```{r}
 #| label: wd-4-factor-ex-1
-
+# Lab 4 ; Problem 7
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   Factor Example 2 (reordering levels)
 
 ```{r}
 #| label: wd-4-factor-ex-2
-
+# Lab 4 ; Problem 7
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   Character (example must use functions from **stringr**)
 
 ```{r}
 #| label: wd-4-string
-
+# Lab 4 ; Problem 4
+ca_childcare <- ca_childcare |> 
+  mutate(
+    county_name = str_remove(county_name, " County"),
+    region = fct_collapse(
+      county_name,
+      "Superior" = superior_counties,
+      "North Coast" = north_coast_counties,
+      "San Francisco" = san_fran_counties,
+      "Northern San Joaquin" = n_san_joaquin_counties,
+      "Central Coast" = central_coast_counties,
+      "Southern San Joaquin" = s_san_joaquin_counties,
+      "Inland" = inland_counties,
+      "Los Angeles County" = la_county,
+      "Orange County" = orange_county,
+      "San Deigo Imperial" = san_diego_imperial_counties
+    )
+  )
+glimpse(ca_childcare)
 ```
 
 -   Date (example must use functions from **lubridate**)
 
 ```{r}
 #| label: wd-4-date
-
+# Lab 5 ; Problem 5
+# Portfolio Revision: previously filtered "check_in_date" based on character, but now I filter it based on ymd
+insepected_get_fit_now_check_in <- get_fit_now_check_in |>
+  mutate(
+    date = ymd(as.character(check_in_date))
+  ) |>
+  filter(
+    membership_id %in% c("48Z7A", "48Z55"),
+    date == ymd("20180109")
+  )
+insepected_get_fit_now_check_in
 ```
 
 **WD-5: I can use mutating joins to combine multiple dataframes.**
@@ -149,35 +321,51 @@ execute:
 
 ```{r}
 #| label: wd-5-left-ex-1
-
+# Lab 4 ; Problem 2
+ca_childcare <- childcare_costs |>
+  left_join(counties, by = c("county_fips_code" = "county_fips_code")) |>
+  filter(state_name == "California")
 ```
 
 -   `right_join()` Example 1
 
 ```{r}
 #| label: wd-5-right
-
+# Lab 4 ; Problem 2
+# Portfolio Revision: previously I combined dataframes using left_join, but now I combine them with right_join
+ca_childcare <- counties |>
+  right_join(childcare_costs, by = c("county_fips_code" = "county_fips_code"))
+  filter(state_name == "California")
 ```
 
 -   `left_join()` **or** `right_join()` Example 2
 
 ```{r}
 #| label: wd-5-left-right-ex-2
-
+# Lab 4 ; Problem 3
+ca_childcare <- ca_childcare |>
+  left_join(tax_rev, by = c("county_name" = "entity_name", "study_year" = "year"))
 ```
 
 -   `inner_join()` Example 1
 
 ```{r}
 #| label: wd-5-inner-ex-1
-
+# Lab 4 ; Problem 2
+# Portfolio Revision: previously I combined dataframes using left_join based on matching counties, but now I combine them with innter_join based on matching counties
+ca_childcare_inner <- childcare_costs |>
+  inner_join(counties, by = c("county_fips_code" = "county_fips_code")) |>
+  filter(state_name == "California")
 ```
 
 -   `inner_join()` Example 2
 
 ```{r}
 #| label: wd-5-inner-ex-2
-
+# Lab 4 ; Problem 3
+# Portfolio Revision: previously I combined dataframes using left_join, but now I combine them with inner_join
+ca_income_tax <- childcare_costs |>
+  inner_join(tax_rev, by = c("county_name" = "entity_name", "study_year" = "year"))
 ```
 
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
@@ -186,14 +374,26 @@ execute:
 
 ```{r}
 #| label: wd-6-semi
-
+# Lab 5 ; Problem 3
+# Portfolio Revision: previously I filtered only the records that match the ID, but now I use semi_join to keep the records that match the ID
+inspected_person <- person |>
+  semi_join(
+    interview |> filter(person_id %in% c(14887, 16371)),
+    by = c("id" = "person_id")
+  )
 ```
 
 -   `anti_join()`
 
 ```{r}
 #| label: wd-6-anti
-
+# Lab 5 ; Problem 3
+# Portfolio Revision: previously I filtered only the records that match the ID, but now I use anti_join to keep the records that match the ID
+inspected_person <- person |>
+  anti_join(
+    interview |> filter(!person_id %in% c(14887, 16371)),
+    by = c("id" = "person_id")
+  )
 ```
 
 **WD-7: I can pivot dataframes from long to wide and visa versa**
@@ -202,14 +402,43 @@ execute:
 
 ```{r}
 #| label: wd-7-long
-
+# Lab 4 ; Problem 7
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   `pivot_wider()`
 
 ```{r}
 #| label: wd-7-wide
-
+# Lab 4 ; Problem 5
+median_income_region <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarize(median_income = median(mhi_2018, na.rm = TRUE)) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_glue = "median_income_{study_year}"
+  ) |>
+  arrange(desc(median_income_2018))
+median_income_region
 ```
 
 ## Reproducibility
@@ -218,11 +447,11 @@ execute:
 
 The following assignments satisfy the above criteria:
 
-- Example 1
-- Example 2
-- Example 3
-- Example 4
-- Example 5
+-   Example 1
+-   Example 2
+-   Example 3
+-   Example 4
+-   Example 5
 
 **R-2: I can write well documented and tidy code.**
 
@@ -311,7 +540,7 @@ The following assignments satisfy the above criteria:
 
 ```
 
--   I can modify my plot titles to clearly communicate the data context 
+-   I can modify my plot titles to clearly communicate the data context
 
 ```{r}
 #| label: dvs-2-ex-3
@@ -396,7 +625,7 @@ The following assignments satisfy the above criteria:
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
 
--   I can modify my column names to clearly communicate the data context 
+-   I can modify my column names to clearly communicate the data context
 
 ```{r}
 #| label: dvs-6-ex-1
@@ -460,7 +689,7 @@ The following assignments satisfy the above criteria:
 
 **PE-2: I can write functions to reduce repetition in my code.**
 
--   Example 1: Function that operates on vectors 
+-   Example 1: Function that operates on vectors
 
 ```{r}
 #| label: pe-2-1

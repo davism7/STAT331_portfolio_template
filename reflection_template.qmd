@@ -39,13 +39,6 @@ evaluations <- read_csv(here::here("Week 3", "Lab 3", "teacher_evals.csv"))
 
 ```{r}
 #| label: wd-1-xlsx
-# Practice Activity 4 ; Problem 1
-military <- read_xlsx("gov_spending_per_capita.xlsx",
-                      sheet = "Share of Govt. spending",
-                      skip  = 7,
-                      n_max = 190,
-                      na = c('xxx', '..', '. .')
-                      )
 ```
 
 **WD-2: I can select necessary columns from a dataset.**
@@ -495,14 +488,30 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: r-3-example
-
+# Lab 4 ; Problem 7
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   Example (function stops)
 
 ```{r}
 #| label: r-3-function-stops
-
 ```
 
 ## Data Visualization & Summarization
@@ -513,28 +522,70 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-1-num
-
+# Lab 4 ; Problem 8
+ggplot(data = ca_childcare,
+       mapping = aes(x = mhi_2018,
+                     y = mc_infant )) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Median Household Income (2018)",
+       y = "Median Price for CB Infant Childcare",
+       title = "Relationship Between Household Income & Infant Childcare Price")
 ```
 
 -   At least one numeric variable and one categorical variable
 
 ```{r}
 #| label: dvs-2-num-cat
-
+# Lab 2 ; Problem 4-8
+ggplot(data = surveys,
+       mapping = aes(x = species,
+                     y = weight)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.2, 
+              color = "steelblue") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Species",
+       y = "",
+       title = "Weight Based on Species",
+       subtitle = "Y-axis: Weight (g)")
 ```
 
 -   At least two categorical variables
 
 ```{r}
 #| label: dvs-2-cat
-
+# Challenge 3 ; Question 2
+ggplot(data = teacher_evals_comparison, 
+       mapping = aes(x = sen_level, fill = set_level)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("excellent" = "#B896D4", "standard" = "#BA955C")) +
+  labs(title = "Evaluation of Teachers' Use of Activities",
+       x = "Years of Experience", 
+       y = "", 
+       fill = "Evaluation Rating") +
+  theme(legend.position = "top")
 ```
 
 -   Dates (time series plot)
 
 ```{r}
 #| label: dvs-2-date
-
+# Lab 4 ; Problem 7
+ggplot(price_by_age,
+       aes(x = study_year, y = mean_price, color = region)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~age, ncol = 3) +
+  labs(
+    x = "Study Year",
+    y = "",
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    color = "California Region"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
@@ -543,35 +594,97 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-2-ex-1
-
+# Lab 4 ; Problem 7
+ggplot(price_by_age,
+       aes(x = study_year, y = mean_price, color = region)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~age, ncol = 3) +
+  labs(
+    x = "Study Year",
+    y = "",
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    color = "California Region"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 -   I can modify my colors to be accessible to anyone's eyes
 
 ```{r}
 #| label: dvs-2-ex-2
-
+# Challenge 2 ; Plot
+surveys <- read_csv(here::here("Week 2", "Lab 2", "surveys.csv"))
+ggplot(data = surveys,
+       mapping = aes(x = species,
+                     y = weight)) +
+  geom_jitter(alpha = 0.2, 
+              color = "grey",
+              size = 0.8) +
+  geom_boxplot(aes(fill = sex),
+                   outlier.shape = NA) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Species",
+       y = "",
+       title = "Weight Based on Species",
+       subtitle = "Y-axis: Weight (g)") +
+  scale_fill_manual(values = c("pink", "#89CFF0"))
 ```
 
 -   I can modify my plot titles to clearly communicate the data context
 
 ```{r}
 #| label: dvs-2-ex-3
-
+# Lab 4 ; Problem 8
+ggplot(data = ca_childcare,
+       mapping = aes(x = mhi_2018,
+                     y = mc_infant )) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Median Household Income (2018)",
+       y = "Median Price for CB Infant Childcare",
+       title = "Relationship Between Household Income & Infant Childcare Price")
 ```
 
 -   I can modify the text in my plot to be more readable
 
 ```{r}
 #| label: dvs-2-ex-4
-
+# Challenge 4 ; Plot
+ggplot(regional_table,
+       aes(x = avg_poverty, y = avg_price, color = setting)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_text(aes(label = region),
+            vjust = -0.8, size = 3, color = "gray30") +
+  labs(
+    title = "Correlation Between Poverty Rate and Childcare Price by Setting",
+    x = "Average Poverty Rate (%)",
+    y = "Average Full-Time Median Weekly Price ($)",
+    color = "Childcare Setting"
+  ) +
+  theme_minimal(base_size = 12)
 ```
 
 -   I can reorder my legend to align with the colors in my plot
 
 ```{r}
 #| label: dvs-2-ex-5
-
+# Lab 4 ; Problem 7
+ggplot(price_by_age,
+       aes(x = study_year, y = mean_price, color = region)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~age, ncol = 3) +
+  labs(
+    x = "Study Year",
+    y = "",
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    color = "California Region"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 **DVS-3: I show creativity in my visualizations**
@@ -580,28 +693,74 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-3-1-ex-1
-
+# Challenge 2 ; Plot
+surveys <- read_csv(here::here("Week 2", "Lab 2", "surveys.csv"))
+ggplot(data = surveys,
+       mapping = aes(x = species,
+                     y = weight)) +
+  geom_jitter(alpha = 0.2, 
+              color = "grey",
+              size = 0.8) +
+  geom_boxplot(aes(fill = sex),
+                   outlier.shape = NA) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Species",
+       y = "",
+       title = "Weight Based on Species",
+       subtitle = "Y-axis: Weight (g)") +
+  scale_fill_manual(values = c("pink", "#89CFF0"))
 ```
 
 -   I can use non-standard colors (Example 2)
 
 ```{r}
 #| label: dvs-3-1-ex-2
-
+# Challenge 3 ; Problem 2
+ggplot(data = teacher_evals_comparison, 
+       mapping = aes(x = sen_level, fill = set_level)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("excellent" = "#B896D4", "standard" = "#BA955C")) +
+  labs(title = "Evaluation of Teachers' Use of Activities",
+       x = "Years of Experience", 
+       y = "", 
+       fill = "Evaluation Rating") +
+  theme(legend.position = "top")
 ```
 
 -   I can use annotations (e.g., `geom_text()`)
 
 ```{r}
 #| label: dvs-3-2
-
+# Challenge 4 ; Plot
+ggplot(regional_table,
+       aes(x = avg_poverty, y = avg_price, color = setting)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_text(aes(label = region),
+            vjust = -0.8, size = 3, color = "gray30") +
+  labs(
+    title = "Correlation Between Poverty Rate and Childcare Price by Setting",
+    x = "Average Poverty Rate (%)",
+    y = "Average Full-Time Median Weekly Price ($)",
+    color = "Childcare Setting"
+  ) +
+  theme_minimal(base_size = 12)
 ```
 
 -   I can choose creative geometries (e.g., `geom_segment()`, `geom_ribbon)()`)
 
 ```{r}
 #| label: dvs-3-3
-
+# Lab 4 ; Problem 8
+ggplot(data = ca_childcare,
+       mapping = aes(x = mhi_2018,
+                     y = mc_infant )) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "Median Household Income (2018)",
+       y = "Median Price for CB Infant Childcare",
+       title = "Relationship Between Household Income & Infant Childcare Price")
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
@@ -610,14 +769,41 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-4-summarize
-
+# Lab 3 ; Problem 6
+teacher_evals_clean |>
+  summarise(
+    instructors = n_distinct(teacher_id),
+    courses = n_distinct(course_id)
+  )
 ```
 
 -   Example using `across()`
 
 ```{r}
 #| label: dvs-4-across
-
+# Lab 4 ; Problem 7
+# Portfolio Revision: previously I used summarise to calculate the average price per group, but now I used across to perform the same summarization
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year) |>
+  summarise(
+    across(
+      .cols = price,
+      .fns = list(mean_price = ~ mean(.x, na.rm = TRUE)),
+      .names = "{.fn}"
+    ),
+    .groups = "drop"
+  ) |>
+  mutate(
+    age = factor(c("Infant", "Toddler", "Preschool")),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 **DVS-5: I can find summaries of variables across multiple groups.**
@@ -626,14 +812,40 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-5-1
-
+# Lab 3 ; Problem 10
+teacher_evals_clean |>
+  group_by(teacher_id) |>
+  filter(question_no == 901) |>
+  summarise(
+    course_count = n_distinct(course_id),
+    average = mean(SET_score_avg, na.rm = TRUE)
+  ) |>
+  filter(course_count >= 5) |>
+  reframe(
+    bind_rows(
+      slice_max(cur_data(), average, n = 1),
+      slice_min(cur_data(), average, n = 1)
+    )
+  )
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dvs-5-2
-
+# Lab 4 ; Problem 5
+median_income_region <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarize(median_income = median(mhi_2018, na.rm = TRUE)) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_glue = "median_income_{study_year}"
+  ) |>
+  arrange(desc(median_income_2018))
+median_income_region
 ```
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
@@ -642,21 +854,57 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-6-ex-1
-
+# Challenge 4 ; Summary Statistics
+regional_summary <- ca_childcare |>
+  select(region, pr_f, mcsa, mfccsa) |>
+  group_by(region) |>
+  summarize(
+    `Average Poverty Rate (%)` = mean(pr_f, na.rm = TRUE),
+    `Avg Center-Based Cost ($)` = mean(mcsa, na.rm = TRUE),
+    `Avg Family (In-Home) Cost ($)` = mean(mfccsa, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(`Average Poverty Rate (%)`)
+regional_summary
 ```
 
 -   I can modify the text in my table to be more readable (e.g., bold face for column headers)
 
 ```{r}
 #| label: dvs-6-ex-2
-
+# Challenge 4 ; Summary Statistics
+# Portfolio Revision: added boldface for column headers
+ca_childcare |>
+  select(region, pr_f, mcsa, mfccsa) |>
+  group_by(region) |>
+  summarize(
+    `Average Poverty Rate (%)` = mean(pr_f, na.rm = TRUE),
+    `Avg Center-Based Cost ($)` = mean(mcsa, na.rm = TRUE),
+    `Avg Family (In-Home) Cost ($)` = mean(mfccsa, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(`Average Poverty Rate (%)`) |>
+  kable() |>
+  kable_styling(full_width = FALSE) |>
+  row_spec(0, bold = TRUE)
 ```
 
 -   I can arrange my table to have an intuitive ordering
 
 ```{r}
 #| label: dvs-6-ex-3
-
+# Challenge 4 ; Summary Statistics
+regional_summary <- ca_childcare |>
+  select(region, pr_f, mcsa, mfccsa) |>
+  group_by(region) |>
+  summarize(
+    `Average Poverty Rate (%)` = mean(pr_f, na.rm = TRUE),
+    `Avg Center-Based Cost ($)` = mean(mcsa, na.rm = TRUE),
+    `Avg Family (In-Home) Cost ($)` = mean(mfccsa, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(`Average Poverty Rate (%)`)
+regional_summary
 ```
 
 **DVS-7: I show creativity in my tables.**
@@ -665,14 +913,42 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dvs-7-ex-1
-
+# Challenge 4 ; Summary Statistics
+# Portfolio Revision: added non-default color to the column headers
+ca_childcare |>
+  select(region, pr_f, mcsa, mfccsa) |>
+  group_by(region) |>
+  summarize(
+    `Average Poverty Rate (%)` = mean(pr_f, na.rm = TRUE),
+    `Avg Center-Based Cost ($)` = mean(mcsa, na.rm = TRUE),
+    `Avg Family (In-Home) Cost ($)` = mean(mfccsa, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(`Average Poverty Rate (%)`) |>
+  gt() |>
+  tab_style(
+    style = cell_fill(color = "#E3F2FD"),
+    locations = cells_column_labels(everything())
+  )
 ```
 
 -   I can modify the layout of my table to be more readable (e.g., `pivot_longer()` or `pivot_wider()`)
 
 ```{r}
 #| label: dvs-7-ex-2
-
+# Lab 4 ; Problem 5
+median_income_region <- ca_childcare |>
+  filter(study_year %in% c(2008, 2018)) |>
+  group_by(region, study_year) |>
+  summarize(median_income = median(mhi_2018, na.rm = TRUE)) |>
+  ungroup() |>
+  pivot_wider(
+    names_from = study_year,
+    values_from = median_income,
+    names_glue = "median_income_{study_year}"
+  ) |>
+  arrange(desc(median_income_2018))
+median_income_region
 ```
 
 ## Program Efficiency
@@ -683,21 +959,59 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: pe-1-one-call
-
+# Lab 4 ; Problem 7
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   using `across()`
 
 ```{r}
 #| label: pe-1-across
-
+# Lab 4 ; Problem 7
+# Portfolio Revision: previously I used summarise to calculate the average price per group, but now I used across to perform the same summarization
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year) |>
+  summarise(
+    across(
+      .cols = price,
+      .fns = list(mean_price = ~ mean(.x, na.rm = TRUE)),
+      .names = "{.fn}"
+    ),
+    .groups = "drop"
+  ) |>
+  mutate(
+    age = factor(c("Infant", "Toddler", "Preschool")),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   using functions from the `map()` family
 
 ```{r}
 #| label: pe-1-map-1
-
 ```
 
 **PE-2: I can write functions to reduce repetition in my code.**
@@ -706,21 +1020,18 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: pe-2-1
-
 ```
 
 -   Example 2: Function that operates on data frames
 
 ```{r}
 #| label: pe-2-2
-
 ```
 
 -   Example 3: Function that operates on vectors *or* data frames
 
 ```{r}
 #| label: pe-2-3
-
 ```
 
 **PE-3:I can use iteration to reduce repetition in my code.**
@@ -729,21 +1040,37 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: pe-3-across
-
+# Lab 4 ; Problem 7
+# Portfolio Revision: previously I was selecting and summarizing individually, but now I iterate over all the columns that start with mc_
+price_by_age <- ca_childcare |>
+  select(region, study_year, starts_with("mc_")) |>
+  pivot_longer(
+    cols = across(starts_with("mc_")),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(across(price, mean, .names = "mean_{.col}", na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
+  )
 ```
 
 -   using a `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.)
 
 ```{r}
 #| label: pe-3-map-1
-
 ```
 
 -   using a `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`)
 
 ```{r}
 #| label: pe-3-map-2
-
 ```
 
 **PE-4: I can use modern tools when carrying out my analysis.**
@@ -752,14 +1079,30 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: pe-4-1
-
+# Lab 3 ; Problem 5
+teacher_evals_clean <- evaluations |>
+  rename(sex = gender) |>
+  mutate(teacher_id = as.character(teacher_id)) |>
+  filter(no_participants >= 10) |>
+  select(course_id, teacher_id, question_no, no_participants, resp_share, SET_score_avg, percent_failed_cur,
+         academic_degree, seniority, sex)
 ```
 
 -   I can connect a data wrangling pipeline into a `ggplot()`
 
 ```{r}
 #| label: pe-4-2
-
+# Lab 4 ; Problem 8
+# Portfolio Revision: previously I had the plot itself, but now I've connected a pipeline into the plot
+ca_childcare |>
+  ggplot(aes(x = mhi_2018, y = mc_infant)) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(
+    x = "Median Household Income (2018)",
+    y = "Median Price for CB Infant Childcare",
+    title = "Relationship Between Household Income & Infant Childcare Price"
+  )
 ```
 
 ## Data Simulation & Statisical Models
@@ -770,14 +1113,12 @@ teacher_evals_clean <- evaluations |>
 
 ```{r}
 #| label: dsm-1-1
-
 ```
 
 -   Example 2
 
 ```{r}
-#| label: dsm-1-2
-
+#| label: dsm-1-2 
 ```
 
 **DSSM-2: I can conduct common statistical analyses in R.**

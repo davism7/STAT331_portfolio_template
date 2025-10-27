@@ -1127,21 +1127,29 @@ ca_childcare |>
 
 ```{r}
 #| label: dsm-2-1
-
+# Lab 2 ; Problem 17
+species_mod <- aov(data = surveys, weight ~ species)
+summary(species_mod)
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dsm-2-2
-
+# Challenge 3 ; Problem 3
+tab <- table(teacher_evals_comparison$sen_level,
+             teacher_evals_comparison$set_level)
+chisq.test(tab)
 ```
 
 -   Example 3
 
 ```{r}
 #| label: dsm-2-3
-
+# Lab 4 ; Problem 9
+reg_mod1 <- lm(mc_infant ~ mhi_2018,
+               data = ca_childcare)
+summary(reg_mod1)
 ```
 
 ## Revising My Thinking

@@ -1330,12 +1330,22 @@ summary(reg_mod1)
 
 <!-- For the revisions included in your Portfolio, to help me understand the nature of your revisions, please denote somehow the feedback I provided you (e.g., boldface, italics, colored text) before your revisions. -->
 
+Throughout the course, I revised my thinking by learning how to write cleaner and more efficient code in R. In labs 2 and 3, I started using the here() function instead of full file paths after getting feedback about reproducibility. I also learned to combine steps and only call function once to make my code easier to read. In challenge 3, I replaced the nested function ifelse() with the function case_when(), which made my logic simpler and more organized. I also began using tools like fct_reorder() and fct_relevel() to automatically order data instead of doing it by hand. These changes helped me understand how to write code that's clear, reproducible, and easier to update when I have to.
+
 ## Extending My Thinking
 
 <!-- How did you extended your thinking throughout the course? How did you extend your thinking on the code examples you have provided in your portfolio? -->
+
+I extended my thinking by trying new ways to make my work more professional and creative. For example in Challenge 4, I used kable() to style my tables and make them easier to read. I also learned how to connect my data cleaning directly into ggplot() instead of extra objects. Over time, I focused more on the look and clarity of my graphs such as how the labels are rotated, the size of the text, and visually appealing colors. These small changes helped me make my visualizations easier for other to understand.
 
 ## Peer Support & Collaboration
 
 <!-- Include an image or a description of feedback you gave that you are proud of (either in a peer review or in Discord). -->
 
 <!-- Include a description of how you grew as a collaborator through the weekly pair programming activities.   -->
+
+Lab 3 Peer Review: "I noticed that question 4 is missing "code" to answer the question. I also noticed that your displaying the entire data frame on question 9-12. Instead of displaying the entire data frame, you should explore the slice methods to simply display what's being asked. Overall the work seems to be done correctly other than the minor takeaways. I appreciate seeing the chatgpt transcript."
+
+I'm specifically proud of this peer review I wrote for Lab 3. I pointed out that my partner's code was missing a few parts and suggested using the slice function instead of printing the whole data frame. I also mentioned that their work looked good overall and that I appreciated how they included their ChatGPT transcript. Writing this review helped me learn how to give feedback that's helpful but also positive.
+
+Through the pair programming activites, I got better at explaining my ideas and listening to others. I learned how to ask qustions that help my partner think through their code instead of just giving them the answer. Overall, I became more comfortable working with others, sharing ideas, and improving together.

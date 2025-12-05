@@ -49,6 +49,14 @@ evaluations <- read_csv(here::here("Week 3", "Lab 3", "teacher_evals.csv"))
 
 ```{r}
 #| label: wd-1-xlsx
+# Practice Activity 4 ; Problem 1
+
+military <- read_xlsx("gov_spending_per_capita.xlsx",
+                      sheet = "Share of Govt. spending",
+                      skip  = 7,
+                      n_max = 190,
+                      na = c('xxx', '..', '. .')
+                      )
 ```
 
 **WD-2: I can select necessary columns from a dataset.**
@@ -78,13 +86,13 @@ teacher_evals_clean |>
 
 # Revision: read course_id as a character 
 
-# Portfolio Revision: previously selected the columns I wanted to keep, but now I'm removing the columns I don't want to keep
+# Portfolio Revision: previously selected the columns I wanted to keep, but now I'm removing the columns I don't want to keep. Utilized start with "std" to get rid of clutter)
 
 teacher_evals_clean <- evaluations |>
   rename(sex = gender) |>
   mutate(teacher_id = as.character(teacher_id)) |>
   filter(no_participants >= 10) |>
-  select(-stud_grade_avg, -stud_grade_std, -stud_grade_var_coef, -percent_failed, -stud_grade_avg_cur, -stud_grade_std_cur, -stud_grade_var_coef_cur, -class_duration, -weekday, -time_of_day, -SET_score_1sem, -maximum_score)
+  select(-starts_with("stud_"), -percent_failed, -class_duration, -weekday, -time_of_day, -SET_score_1sem, -maximum_score)
 ```
 
 -   Example selecting columns based on logical values (e.g., `starts_with()`, `ends_with()`, `contains()`, `where()`)
@@ -173,6 +181,7 @@ teacher_evals_comparison <- evaluations |>
 ```{r}
 #| label: wd-3-character
 # Lab 5 ; Problem 2
+
 inspected_person <- person |>
   filter(
     (address_street_name == "Northwestern Dr" &
@@ -188,6 +197,7 @@ inspected_person
 ```{r}
 #| label: wd-3-string
 # Lab 5 ; Problem 7
+
 insepected_drivers_license <- drivers_license |>
   filter(
     id %in% c(173289, 423327),
@@ -201,7 +211,9 @@ insepected_drivers_license
 ```{r}
 #| label: wd-3-date
 # Lab 5 ; Problem 5
+
 # Portfolio Revision: previously filtered "check_in_date" based on character, but now I filter it based on ymd
+
 insepected_get_fit_now_check_in <- get_fit_now_check_in |>
   mutate(
     date = ymd(as.character(check_in_date))
@@ -246,6 +258,7 @@ select(course_id, set_level, sen_level)
 ```{r}
 #| label: wd-4-numeric-ex-2
 # Challenge 4; Problem "Summary Statistics"
+
 regional_summary <- ca_childcare |>
   select(region, pr_f, mcsa, mfccsa) |>
   group_by(region) |>
@@ -321,30 +334,13 @@ price_by_age <- ca_childcare |>
 
 ```{r}
 #| label: wd-4-string
-# Lab 4 Revisions; Problem 4
+# Practice 5 Revisions; Problem 5
 
-# Comment: You should only call the mutate() function once!
-
-# Revision: only used mutate once instead of twice
-
-ca_childcare <- ca_childcare |> 
+message_data <- message_data |>
   mutate(
-    county_name = str_remove(county_name, " County"),
-    region = fct_collapse(
-      county_name,
-      "Superior" = superior_counties,
-      "North Coast" = north_coast_counties,
-      "San Francisco" = san_fran_counties,
-      "Northern San Joaquin" = n_san_joaquin_counties,
-      "Central Coast" = central_coast_counties,
-      "Southern San Joaquin" = s_san_joaquin_counties,
-      "Inland" = inland_counties,
-      "Los Angeles County" = la_county,
-      "Orange County" = orange_county,
-      "San Deigo Imperial" = san_diego_imperial_counties
-    )
+    Word = str_replace_all(Word, pattern = "z", replacement = "t")
   )
-glimpse(ca_childcare)
+message_data
 ```
 
 -   Date (example must use functions from **lubridate**)
@@ -352,7 +348,9 @@ glimpse(ca_childcare)
 ```{r}
 #| label: wd-4-date
 # Lab 5 ; Problem 5
+
 # Portfolio Revision: previously filtered "check_in_date" based on character, but now I filter it based on ymd
+
 insepected_get_fit_now_check_in <- get_fit_now_check_in |>
   mutate(
     date = ymd(as.character(check_in_date))
@@ -392,6 +390,7 @@ ca_childcare <- childcare_costs |>
 # Revision: used country_fips_code instead
 
 # Portfolio Revision: previously I combined dataframes using left_join, but now I combine them with right_join
+
 ca_childcare <- counties |>
   right_join(childcare_costs, by = c("county_fips_code" = "county_fips_code"))
   filter(state_name == "California")
@@ -402,6 +401,7 @@ ca_childcare <- counties |>
 ```{r}
 #| label: wd-5-left-right-ex-2
 # Lab 4 ; Problem 3
+
 ca_childcare <- ca_childcare |>
   left_join(tax_rev, by = c("county_name" = "entity_name", "study_year" = "year"))
 ```
@@ -410,26 +410,34 @@ ca_childcare <- ca_childcare |>
 
 ```{r}
 #| label: wd-5-inner-ex-1
-# Lab 4 ; Problem 2
+# Lab 5
 
-# Comment: Technically, you don't need to use join_by() if both datasets have the same column names. You can simply use by = "county_fips_code". I would highly recommend filtering first, so you are working with (joining) a smaller dataset.
+# Comment: It looks like you are using values from one dataset to filter another dataset rather than joining two datasets together. The intention of this lab is to practice using joins!
 
-# Revision: used country_fips_code instead
+# Revision: utilized inner join rather than filtering
 
-# Portfolio Revision: previously I combined dataframes using left_join based on matching counties, but now I combine them with innter_join based on matching counties
-ca_childcare_inner <- childcare_costs |>
-  inner_join(counties, by = c("county_fips_code" = "county_fips_code")) |>
-  filter(state_name == "California")
+insepected_interview <- inspected_person |>
+  inner_join(interview, by = c("id" = "person_id"))
+insepected_interview$transcript
 ```
 
 -   `inner_join()` Example 2
 
 ```{r}
 #| label: wd-5-inner-ex-2
-# Lab 4 ; Problem 3
-# Portfolio Revision: previously I combined dataframes using left_join, but now I combine them with inner_join
-ca_income_tax <- childcare_costs |>
-  inner_join(tax_rev, by = c("county_name" = "entity_name", "study_year" = "year"))
+# Lab 5
+
+# Comment: It looks like you are using values from one dataset to filter another dataset rather than joining two datasets together. The intention of this lab is to practice using joins!
+
+# Revision: utilized inner join rather than filtering
+
+insepected_get_fit_now_check_in <- insepected_get_fit_now_member |>
+  inner_join(get_fit_now_check_in, by = c("id" = "membership_id")) |>
+  mutate(
+    date = ymd(as.character(check_in_date))
+  ) |>
+  filter(date == ymd("20180109"))
+insepected_get_fit_now_check_in
 ```
 
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
@@ -438,26 +446,26 @@ ca_income_tax <- childcare_costs |>
 
 ```{r}
 #| label: wd-6-semi
-# Lab 5 ; Problem 3
+# Lab 5
+
 # Portfolio Revision: previously I filtered only the records that match the ID, but now I use semi_join to keep the records that match the ID
+
 inspected_person <- person |>
-  semi_join(
-    interview |> filter(person_id %in% c(14887, 16371)),
-    by = c("id" = "person_id")
-  )
+  semi_join(interview, by = c("id" = "person_id")) |>
+  filter(id %in% c(14887, 16371))
 ```
 
 -   `anti_join()`
 
 ```{r}
 #| label: wd-6-anti
-# Lab 5 ; Problem 3
-# Portfolio Revision: previously I filtered only the records that match the ID, but now I use anti_join to keep the records that match the ID
+# Lab 5 
+
+# Portfolio Revision: properly set up the anti join taught in class
+
 inspected_person <- person |>
-  anti_join(
-    interview |> filter(!person_id %in% c(14887, 16371)),
-    by = c("id" = "person_id")
-  )
+  anti_join(interview, by = c("id" = "person_id")) |>
+  filter(!id %in% c(14887, 16371))
 ```
 
 **WD-7: I can pivot dataframes from long to wide and visa versa**
@@ -534,6 +542,7 @@ The following assignments satisfy the above criteria:
 ```{r}
 #| label: r-2-1
 # Lab 4 ; Problem 8
+
 ggplot(data = ca_childcare,
        mapping = aes(x = mhi_2018,
                      y = mc_infant )) +
@@ -548,24 +557,49 @@ ggplot(data = ca_childcare,
 
 ```{r}
 #| label: r-2-2
-# Lab 3 Revision ; Problem 5
+# Challenge 4
 
-# Comment: Should course_id be treated as a numerical variable? These are a proxy for a course subject and number. If the variable was recorded as STAT 331 then it would be read in as a character...
-
-# Revision: read course_id as a character 
-
-teacher_evals_clean <- evaluations |>
-  rename(sex = gender) |>
-  mutate(teacher_id = as.character(teacher_id)) |>
-  filter(no_participants >= 10) |>
-  select(course_id, teacher_id, question_no, no_participants, resp_share, SET_score_avg, percent_failed_cur,
-         academic_degree, seniority, sex)
+regional_table <- ca_childcare |>
+  group_by(region) |>
+  summarize(
+    avg_poverty = mean(pr_f, na.rm = TRUE),
+    avg_center_based = mean(mcsa, na.rm = TRUE),
+    avg_family_inhome = mean(mfccsa, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  pivot_longer(
+    cols = c(avg_center_based, avg_family_inhome),
+    names_to = "setting",
+    values_to = "avg_price"
+  ) |>
+  mutate(setting = recode(setting,
+                          "avg_center_based" = "Center-Based",
+                          "avg_family_inhome" = "Family (In-Home)"))
 ```
 
 -   Example of function formatting
 
 ```{r}
 #| label: r-2-3
+# Challenge 7 ; Problem 2
+
+# Comment: It looks like you are checking multiple condtions in your if_else() function. This is exactly what the case_when() function is built for! Where are your function checks? What types of inputs does your function expect?
+
+# Revision: added input checks with stopifnot() and replaced conditions with case_when()
+
+cleaning_values <- function(vec, min, max) {
+  
+  stopifnot("vec is not numeric" = is.numeric(vec),
+            "min is not numeric" =  is.numeric(min),
+            "min is not a scalar value" = length(min) == 1,
+            "max is not numeric" =  is.numeric(max),
+            "max is not a scalar value" = length(max) == 1,
+            "max is not greater than min" = max > min)
+ 
+   case_when(vec < min ~ NA,
+             vec > max ~ NA,
+             .default = vec)
+}
 ```
 
 **R-3: I can write robust programs that are resistant to changes in inputs.**
@@ -579,6 +613,8 @@ teacher_evals_clean <- evaluations |>
 # Comment: I didn't summarize the data before plotting! Can you reorder the facets so they go in the same order as mine? Can you reorder the colors in the legend so they appear in the same order as the lines in the plot? I am specifically looking for a tool that does the reordering for you since doing the reordering by hand is not a robust programming practice! Do you need to rotate the x-axis labels? Is there a way you can make this plot without making people tilt their head to read the titles of your plot?Your text is quite squished! The size of the text in my plot is not the default size, because it ends up being squished. Can you figure out how to resize the size of the text used in your plot?
 
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
+
+# Context: Using pivot_longer to reshape the data was a good aproach since it keeps my code flexible if more age categories are added later. Also using na.rm = True in the summary is a good approach since it prevents missing data from breaking the analysis.
 
 price_by_age <- ca_childcare |>
   select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
@@ -603,6 +639,25 @@ price_by_age <- ca_childcare |>
 
 ```{r}
 #| label: r-3-function-stops
+# Challenge 7 ; Problem 2
+
+# Comment: It looks like you are checking multiple condtions in your if_else() function. This is exactly what the case_when() function is built for! Where are your function checks? What types of inputs does your function expect?
+
+# Revision: added input checks with stopifnot() and replaced conditions with case_when()
+
+cleaning_values <- function(vec, min, max) {
+  
+  stopifnot("vec is not numeric" = is.numeric(vec),
+            "min is not numeric" =  is.numeric(min),
+            "min is not a scalar value" = length(min) == 1,
+            "max is not numeric" =  is.numeric(max),
+            "max is not a scalar value" = length(max) == 1,
+            "max is not greater than min" = max > min)
+ 
+   case_when(vec < min ~ NA,
+             vec > max ~ NA,
+             .default = vec)
+}
 ```
 
 ## Data Visualization & Summarization
@@ -614,14 +669,17 @@ price_by_age <- ca_childcare |>
 ```{r}
 #| label: dvs-1-num
 # Lab 4 ; Problem 8
+
 ggplot(data = ca_childcare,
-       mapping = aes(x = mhi_2018,
-                     y = mc_infant )) +
+       mapping = aes(x = mhi_2018, 
+                     y = mc_infant)) +
   geom_point(color = "steelblue") +
   geom_smooth(method = "lm", se = TRUE) +
-  labs(x = "Median Household Income (2018)",
-       y = "Median Price for CB Infant Childcare",
-       title = "Relationship Between Household Income & Infant Childcare Price")
+  labs(
+    x = "Median Household Income (2018)",
+    y = "Median Price for CB Infant Childcare",
+    title = "Relationship Between Household Income & Infant Childcare Price"
+  )
 ```
 
 -   At least one numeric variable and one categorical variable
@@ -634,17 +692,22 @@ ggplot(data = ca_childcare,
 
 # Revision: Replaced the facet_grid function with the facet_wrap function. Specified the title for the variable on the x-axis
 
+# Portfolio Revision: changed tilt text to dodged position
+
 ggplot(data = surveys,
-       mapping = aes(x = species,
-                     y = weight)) +
+       mapping = aes(x = species, y = weight)) +
   geom_boxplot(outlier.shape = NA) +
-  geom_jitter(alpha = 0.2, 
-              color = "steelblue") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Species",
-       y = "",
-       title = "Weight Based on Species",
-       subtitle = "Y-axis: Weight (g)")
+  geom_jitter(
+    position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.75),
+    alpha = 0.2,
+    color = "steelblue"
+  ) +
+  labs(
+    x = "Species",
+    y = "",
+    title = "Weight Based on Species",
+    subtitle = "Y-axis: Weight (g)"
+  )
 ```
 
 -   At least two categorical variables
@@ -657,15 +720,19 @@ ggplot(data = surveys,
 
 # Revision: removed the percent function and replaced it with scales
 
+# Portfolio Revision: fixed it so that the percent is no longer superseded
+
 ggplot(data = teacher_evals_comparison, 
        mapping = aes(x = sen_level, fill = set_level)) +
   geom_bar(position = "fill") +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::label_percent()) +
   scale_fill_manual(values = c("excellent" = "#B896D4", "standard" = "#BA955C")) +
-  labs(title = "Evaluation of Teachers' Use of Activities",
-       x = "Years of Experience", 
-       y = "", 
-       fill = "Evaluation Rating") +
+  labs(
+    title = "Evaluation of Teachers' Use of Activities",
+    x = "Years of Experience",
+    y = "",
+    fill = "Evaluation Rating"
+  ) +
   theme(legend.position = "top")
 ```
 
@@ -679,10 +746,12 @@ ggplot(data = teacher_evals_comparison,
 
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
 
+# Portfolio Revision: changed tilted text to dodged position
+
 ggplot(price_by_age,
        aes(x = study_year, y = mean_price, color = region)) +
-  geom_point() +
-  geom_smooth(se = FALSE) +
+  geom_point(position = position_dodge(width = 0.4)) +
+  geom_line(position = position_dodge(width = 0.4)) +
   facet_wrap(~age, ncol = 3) +
   labs(
     x = "Study Year",
@@ -690,8 +759,7 @@ ggplot(price_by_age,
     title = "Weekly Median Price for Center-Based Childcare ($)",
     color = "California Region"
   ) +
-  theme_minimal(base_size = 10) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal(base_size = 10)
 ```
 
 **DVS-2: I use plot modifications to make my visualization clear to the reader.**
@@ -706,9 +774,12 @@ ggplot(price_by_age,
 
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
 
+# Portfolio Revision: changed tilted text to dodged position
+
 ggplot(price_by_age,
-       aes(x = study_year, y = mean_price, color = region)) +
-  geom_point() +
+       aes(x = study_year, y = mean_price, color = region, group = region)) +
+  geom_point(position = position_dodge(width = 0.4)) +
+  geom_line(position = position_dodge(width = 0.4)) +
   geom_smooth(se = FALSE) +
   facet_wrap(~age, ncol = 3) +
   labs(
@@ -717,8 +788,7 @@ ggplot(price_by_age,
     title = "Weekly Median Price for Center-Based Childcare ($)",
     color = "California Region"
   ) +
-  theme_minimal(base_size = 10) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal(base_size = 10)
 ```
 
 -   I can modify my colors to be accessible to anyone's eyes
@@ -731,21 +801,24 @@ ggplot(price_by_age,
 
 # Revision: Changed the color palette for groups larger than 4. Rotated the x-axis labels. Added themes to the plot. Removed the legend from the plot.
 
-surveys <- read_csv(here::here("Week 2", "Lab 2", "surveys.csv"))
+# Portfolio Revision: changed tilted text to dodged position ; made it more color friendly
+
 ggplot(data = surveys,
        mapping = aes(x = species,
                      y = weight)) +
   geom_jitter(alpha = 0.2, 
               color = "grey",
-              size = 0.8) +
+              size = 0.8,
+              position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.7)) +
   geom_boxplot(aes(fill = sex),
-                   outlier.shape = NA) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+               outlier.shape = NA,
+               position = position_dodge(width = 0.7)) +
   labs(x = "Species",
        y = "",
        title = "Weight Based on Species",
        subtitle = "Y-axis: Weight (g)") +
-  scale_fill_manual(values = c("pink", "#89CFF0"))
+  scale_fill_manual(values = c("F" = "#0072B2", 
+                               "M" = "#D55E00"))
 ```
 
 -   I can modify my plot titles to clearly communicate the data context
@@ -753,6 +826,7 @@ ggplot(data = surveys,
 ```{r}
 #| label: dvs-2-ex-3
 # Lab 4 ; Problem 8
+
 ggplot(data = ca_childcare,
        mapping = aes(x = mhi_2018,
                      y = mc_infant )) +
@@ -768,6 +842,7 @@ ggplot(data = ca_childcare,
 ```{r}
 #| label: dvs-2-ex-4
 # Challenge 4 ; Plot
+
 ggplot(regional_table,
        aes(x = avg_poverty, y = avg_price, color = setting)) +
   geom_point(size = 3) +
@@ -792,6 +867,24 @@ ggplot(regional_table,
 # Comment: I didn't summarize the data before plotting! Can you reorder the facets so they go in the same order as mine? Can you reorder the colors in the legend so they appear in the same order as the lines in the plot? I am specifically looking for a tool that does the reordering for you since doing the reordering by hand is not a robust programming practice! Do you need to rotate the x-axis labels? Is there a way you can make this plot without making people tilt their head to read the titles of your plot?Your text is quite squished! The size of the text in my plot is not the default size, because it ends up being squished. Can you figure out how to resize the size of the text used in your plot?
 
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
+
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool")
+  ) |>
+  mutate(region = fct_reorder(region, mean_price))
 
 ggplot(price_by_age,
        aes(x = study_year, y = mean_price, color = region)) +
@@ -820,7 +913,8 @@ ggplot(price_by_age,
 
 # Revision: Changed the color palette for groups larger than 4. Rotated the x-axis labels. Added themes to the plot. Removed the legend from the plot.
 
-surveys <- read_csv(here::here("Week 2", "Lab 2", "surveys.csv"))
+# Portfolio Revision: utilized a color package rather then selecting collors
+
 ggplot(data = surveys,
        mapping = aes(x = species,
                      y = weight)) +
@@ -828,13 +922,13 @@ ggplot(data = surveys,
               color = "grey",
               size = 0.8) +
   geom_boxplot(aes(fill = sex),
-                   outlier.shape = NA) +
+               outlier.shape = NA) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Species",
        y = "",
        title = "Weight Based on Species",
        subtitle = "Y-axis: Weight (g)") +
-  scale_fill_manual(values = c("pink", "#89CFF0"))
+  scale_fill_brewer(palette = "Set2")
 ```
 
 -   I can use non-standard colors (Example 2)
@@ -847,11 +941,13 @@ ggplot(data = surveys,
 
 # Revision: removed the percent function and replaced it with scales
 
+# Portfolio Revision: utilized a color package rather then selecting collors
+
 ggplot(data = teacher_evals_comparison, 
        mapping = aes(x = sen_level, fill = set_level)) +
   geom_bar(position = "fill") +
-  scale_y_continuous(labels = scales::percent) +
-  scale_fill_manual(values = c("excellent" = "#B896D4", "standard" = "#BA955C")) +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_fill_brewer(palette = "Set2") +
   labs(title = "Evaluation of Teachers' Use of Activities",
        x = "Years of Experience", 
        y = "", 
@@ -864,12 +960,15 @@ ggplot(data = teacher_evals_comparison,
 ```{r}
 #| label: dvs-3-2
 # Challenge 4 ; Plot
+
 ggplot(regional_table,
        aes(x = avg_poverty, y = avg_price, color = setting)) +
   geom_point(size = 3) +
   geom_smooth(method = "lm", se = FALSE) +
   geom_text(aes(label = region),
-            vjust = -0.8, size = 3, color = "gray30") +
+            vjust = -0.3,
+            size = 2.5,
+            color = "gray50") +
   labs(
     title = "Correlation Between Poverty Rate and Childcare Price by Setting",
     x = "Average Poverty Rate (%)",
@@ -884,14 +983,23 @@ ggplot(regional_table,
 ```{r}
 #| label: dvs-3-3
 # Lab 4 ; Problem 8
-ggplot(data = ca_childcare,
-       mapping = aes(x = mhi_2018,
-                     y = mc_infant )) +
+
+# Portfolio Revision: added geom_segment to incorporate a standard geometry
+
+ggplot(ca_childcare,
+       aes(x = mhi_2018, y = mc_infant)) +
   geom_point(color = "steelblue") +
   geom_smooth(method = "lm", se = TRUE) +
-  labs(x = "Median Household Income (2018)",
-       y = "Median Price for CB Infant Childcare",
-       title = "Relationship Between Household Income & Infant Childcare Price")
+  geom_segment(aes(x = min(mhi_2018),
+                   xend = max(mhi_2018),
+                   y = mean(mc_infant),
+                   yend = mean(mc_infant)),
+               color = "red", linetype = "dashed") +
+  labs(
+    x = "Median Household Income (2018)",
+    y = "Median Price for CB Infant Childcare",
+    title = "Relationship Between Income & Infant Childcare Price"
+  )
 ```
 
 **DVS-4: I can calculate numerical summaries of variables.**
@@ -901,6 +1009,7 @@ ggplot(data = ca_childcare,
 ```{r}
 #| label: dvs-4-summarize
 # Lab 3 ; Problem 6
+
 teacher_evals_clean |>
   summarise(
     instructors = n_distinct(teacher_id),
@@ -912,35 +1021,18 @@ teacher_evals_clean |>
 
 ```{r}
 #| label: dvs-4-across
-# Lab 4 Revisions ; Problem 7
+# Lab 3 Revisions ; Problem 6
 
 # Comment: I didn't summarize the data before plotting! Can you reorder the facets so they go in the same order as mine? Can you reorder the colors in the legend so they appear in the same order as the lines in the plot? I am specifically looking for a tool that does the reordering for you since doing the reordering by hand is not a robust programming practice! Do you need to rotate the x-axis labels? Is there a way you can make this plot without making people tilt their head to read the titles of your plot?Your text is quite squished! The size of the text in my plot is not the default size, because it ends up being squished. Can you figure out how to resize the size of the text used in your plot?
 
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
 
-# Portfolio Revision: previously I used summarise to calculate the average price per group, but now I used across to perform the same summarization
+# Portfolio Revision: applied across()
 
-price_by_age <- ca_childcare |>
-  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
-  pivot_longer(
-    cols = starts_with("mc_"),
-    names_to = "age",
-    values_to = "price"
-  ) |>
-  group_by(region, study_year) |>
-  summarise(
-    across(
-      .cols = price,
-      .fns = list(mean_price = ~ mean(.x, na.rm = TRUE)),
-      .names = "{.fn}"
-    ),
-    .groups = "drop"
-  ) |>
-  mutate(
-    age = factor(c("Infant", "Toddler", "Preschool")),
-    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
-    region = fct_reorder(region, mean_price, .fun = mean)
-  )
+teacher_evals_clean |> 
+  summarize(across(.cols = c(teacher_id, course_id),
+                   .fns = ~ n_distinct(.x))) |> 
+  kable(col.names = c("Unique Instructors", "Unique Courses"))
 ```
 
 **DVS-5: I can find summaries of variables across multiple groups.**
@@ -955,9 +1047,11 @@ price_by_age <- ca_childcare |>
 
 # Revision: removed the tool that was not discussed in class
 
+# Portfolio Revision: filtered first then grouped
+
 teacher_evals_clean |>
-  group_by(teacher_id) |>
   filter(question_no == 901) |>
+  group_by(teacher_id) |>
   summarise(
     course_count = n_distinct(course_id),
     average = mean(SET_score_avg, na.rm = TRUE)
@@ -1002,6 +1096,7 @@ median_income_region
 ```{r}
 #| label: dvs-6-ex-1
 # Challenge 4 ; Summary Statistics
+
 regional_summary <- ca_childcare |>
   select(region, pr_f, mcsa, mfccsa) |>
   group_by(region) |>
@@ -1020,7 +1115,9 @@ regional_summary
 ```{r}
 #| label: dvs-6-ex-2
 # Challenge 4 ; Summary Statistics
+
 # Portfolio Revision: added boldface for column headers
+
 ca_childcare |>
   select(region, pr_f, mcsa, mfccsa) |>
   group_by(region) |>
@@ -1041,6 +1138,7 @@ ca_childcare |>
 ```{r}
 #| label: dvs-6-ex-3
 # Challenge 4 ; Summary Statistics
+
 regional_summary <- ca_childcare |>
   select(region, pr_f, mcsa, mfccsa) |>
   group_by(region) |>
@@ -1061,7 +1159,9 @@ regional_summary
 ```{r}
 #| label: dvs-7-ex-1
 # Challenge 4 ; Summary Statistics
+
 # Portfolio Revision: added non-default color to the column headers
+
 ca_childcare |>
   select(region, pr_f, mcsa, mfccsa) |>
   group_by(region) |>
@@ -1147,6 +1247,7 @@ price_by_age <- ca_childcare |>
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
 
 # Portfolio Revision: previously I used summarise to calculate the average price per group, but now I used across to perform the same summarization
+
 price_by_age <- ca_childcare |>
   select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
   pivot_longer(
@@ -1174,6 +1275,14 @@ price_by_age <- ca_childcare |>
 
 ```{r}
 #| label: pe-1-map-1
+# Lab 9 ; Problem 1
+
+table <-surveys |>
+  map_chr(~ paste(class(.x), collapse = ", ")) |> 
+  enframe(name = "Variable", value = "Data Type") |>
+  kable()
+
+table
 ```
 
 **PE-2: I can write functions to reduce repetition in my code.**
@@ -1182,18 +1291,80 @@ price_by_age <- ca_childcare |>
 
 ```{r}
 #| label: pe-2-1
+# Challenge 7 ; Problem 2
+
+# Comment: It looks like you are checking multiple condtions in your if_else() function. This is exactly what the case_when() function is built for! Where are your function checks? What types of inputs does your function expect?
+
+# Revision: added input checks with stopifnot() and replaced conditions with case_when()
+
+cleaning_values <- function(vec, min, max) {
+  
+  stopifnot("vec is not numeric" = is.numeric(vec),
+            "min is not numeric" =  is.numeric(min),
+            "min is not a scalar value" = length(min) == 1,
+            "max is not numeric" =  is.numeric(max),
+            "max is not a scalar value" = length(max) == 1,
+            "max is not greater than min" = max > min)
+ 
+   case_when(vec < min ~ NA,
+             vec > max ~ NA,
+             .default = vec)
+}
 ```
 
 -   Example 2: Function that operates on data frames
 
 ```{r}
 #| label: pe-2-2
+# Lab 8 ; Problem 3
+
+plot_function <- function(df, x_var, y_var, color_var = NULL){
+  
+  x_name <- names(select(df, {{x_var}}))
+  y_name <- names(select(df, {{y_var}}))
+  color_name <- names(select(df, {{color_var}}))
+  
+  x_label <- x_name |>
+    stringr::str_replace_all("_", " ") |>
+    stringr::str_to_title()
+  
+  y_label <- y_name |>
+    stringr::str_replace_all("_", " ") |>
+    stringr::str_to_title()
+  
+  color_label <- color_name |>
+    stringr::str_replace_all("_", " ") |>
+    stringr::str_to_title()
+  
+  df |>
+    ggplot(aes(x = {{x_var}}, y = {{y_var}}, color = {{color_var}})) +
+    geom_point(size = 3, alpha = 0.7) +
+    labs(
+      x = x_label,
+      y = y_label,
+      color = color_label,
+      title = paste("Relationship Between", x_label, "&", y_label)
+    ) + 
+    theme_minimal(base_size = 13)
+}
 ```
 
 -   Example 3: Function that operates on vectors *or* data frames
 
 ```{r}
 #| label: pe-2-3
+# Lab 8 ; Problem 2
+
+pivot_table <- function(df, row, col){
+  df |>
+    count({{row}}, {{col}}) |>
+    pivot_wider(
+      names_from = {{col}},
+      values_from = n,
+      values_fill = 0
+    ) |>
+    adorn_totals(where = c("row", "col"))
+}
 ```
 
 **PE-3:I can use iteration to reduce repetition in my code.**
@@ -1202,42 +1373,37 @@ price_by_age <- ca_childcare |>
 
 ```{r}
 #| label: pe-3-across
-# Lab 4 Revisions; Problem 7
+# Lab 3 Revisions ; Problem 6
 
 # Comment: I didn't summarize the data before plotting! Can you reorder the facets so they go in the same order as mine? Can you reorder the colors in the legend so they appear in the same order as the lines in the plot? I am specifically looking for a tool that does the reordering for you since doing the reordering by hand is not a robust programming practice! Do you need to rotate the x-axis labels? Is there a way you can make this plot without making people tilt their head to read the titles of your plot?Your text is quite squished! The size of the text in my plot is not the default size, because it ends up being squished. Can you figure out how to resize the size of the text used in your plot?
 
 # Revisions: Removed the summarize function for this apporach. Reordered the facets. Reordered the legend based on the order it appears on the plot. Rotated the x-axis. Fixed the squished letters and plot.
 
-# Portfolio Revision: previously I was selecting and summarizing individually, but now I iterate over all the columns that start with mc_
-price_by_age <- ca_childcare |>
-  select(region, study_year, starts_with("mc_")) |>
-  pivot_longer(
-    cols = across(starts_with("mc_")),
-    names_to = "age",
-    values_to = "price"
-  ) |>
-  group_by(region, study_year, age) |>
-  summarise(across(price, mean, .names = "mean_{.col}", na.rm = TRUE), .groups = "drop") |>
-  mutate(
-    age = fct_recode(factor(age),
-                     "Infant" = "mc_infant",
-                     "Toddler" = "mc_toddler",
-                     "Preschool" = "mc_preschool"),
-    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
-    region = fct_reorder(region, mean_price, .fun = mean)
-  )
+# Portfolio Revision: applied across()
+
+teacher_evals_clean |> 
+  summarize(across(.cols = c(teacher_id, course_id),
+                   .fns = ~ n_distinct(.x))) |> 
+  kable(col.names = c("Unique Instructors", "Unique Courses"))
 ```
 
 -   using a `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.)
 
 ```{r}
 #| label: pe-3-map-1
-```
+# Lab 9 ; Problem 7
 
--   using a `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`)
+missing_table <- fish |>
+  map_int(~ sum(is.na(.x))) |>        
+  enframe(name = "Variable",
+          value = "Missing Values") |>
+  arrange(desc(`Missing Values`)) |>
+  kable(col.names = c("Variable", "Missing Values"),
+        caption = "Variables with Missing Values in BlackfootFish Dataset") |>
+  kable_minimal(full_width = FALSE)
 
-```{r}
-#| label: pe-3-map-2
+missing_table
+
 ```
 
 **PE-4: I can use modern tools when carrying out my analysis.**
@@ -1246,35 +1412,66 @@ price_by_age <- ca_childcare |>
 
 ```{r}
 #| label: pe-4-1
-# Lab 3 ; Problem 5
+# Challenge 3 Revisions ; Problem 2
 
-# Comment: Should course_id be treated as a numerical variable? These are a proxy for a course subject and number. If the variable was recorded as STAT 331 then it would be read in as a character...
+# Comment: Technically, percent() has been superseded. Meaning, there is another function you should use instead.
 
-# Revision: read course_id as a character 
+# Revision: removed the percent function and replaced it with scales
 
-teacher_evals_clean <- evaluations |>
-  rename(sex = gender) |>
-  mutate(teacher_id = as.character(teacher_id)) |>
-  filter(no_participants >= 10) |>
-  select(course_id, teacher_id, question_no, no_participants, resp_share, SET_score_avg, percent_failed_cur,
-         academic_degree, seniority, sex)
+# Portfolio Revision: fixed it so that the percent is no longer superseded
+
+ggplot(data = teacher_evals_comparison, 
+       mapping = aes(x = sen_level, fill = set_level)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::label_percent()) +
+  scale_fill_manual(values = c("excellent" = "#B896D4", "standard" = "#BA955C")) +
+  labs(
+    title = "Evaluation of Teachers' Use of Activities",
+    x = "Years of Experience",
+    y = "",
+    fill = "Evaluation Rating"
+  ) +
+  theme(legend.position = "top")
 ```
 
 -   I can connect a data wrangling pipeline into a `ggplot()`
 
 ```{r}
 #| label: pe-4-2
-# Lab 4 ; Problem 8
-# Portfolio Revision: previously I had the plot itself, but now I've connected a pipeline into the plot
-ca_childcare |>
-  ggplot(aes(x = mhi_2018, y = mc_infant)) +
-  geom_point(color = "steelblue") +
-  geom_smooth(method = "lm", se = TRUE) +
-  labs(
-    x = "Median Household Income (2018)",
-    y = "Median Price for CB Infant Childcare",
-    title = "Relationship Between Household Income & Infant Childcare Price"
+# Lab 4 ; Problem 7
+
+price_by_age <- ca_childcare |>
+  select(region, study_year, mc_infant, mc_toddler, mc_preschool) |>
+  pivot_longer(
+    cols = starts_with("mc_"),
+    names_to = "age",
+    values_to = "price"
+  ) |>
+  group_by(region, study_year, age) |>
+  summarise(mean_price = mean(price, na.rm = TRUE), .groups = "drop") |>
+  mutate(
+    age = fct_recode(factor(age),
+                     "Infant" = "mc_infant",
+                     "Toddler" = "mc_toddler",
+                     "Preschool" = "mc_preschool"),
+    age = fct_relevel(age, "Infant", "Toddler", "Preschool"),
+    region = fct_reorder(region, mean_price, .fun = mean)
   )
+
+ggplot(price_by_age,
+       aes(x = study_year, y = mean_price, color = region)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  facet_wrap(~age, ncol = 3) +
+  labs(
+    x = "Study Year",
+    y = "",
+    title = "Weekly Median Price for Center-Based Childcare ($)",
+    color = "California Region"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 ## Data Simulation & Statisical Models
@@ -1285,12 +1482,49 @@ ca_childcare |>
 
 ```{r}
 #| label: dsm-1-1
+# Lab 10 ; Problem 4
+
+intercept=2
+slope=1
+
+x = runif(100, min=0, max=1)
+
+ep = rnorm(100, mean=0, sd=1)
+
+y = intercept + x*slope + ep
+
+observed_data <- tibble(
+  x=x,
+  y=y
+)
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dsm-1-2 
+# Lab 10 ; Problem 8
+
+mycifun <- function(beta0, beta1, n) {
+  x <- runif(n, min=0, max=1)
+  
+  ep <- rnorm(n, mean=0, sd=1)
+  
+  y <- beta0 + beta1 * x + ep
+  
+  df <- tibble(x=x, y=y)
+  
+  linear_regression <- lm(y~x, data=df)
+  
+  row <- tidy(linear_regression, conf.int=TRUE) |>
+    filter(term=="x")
+  
+  row <- row |>
+    mutate(cover = if_else(conf.low<=beta1 & beta1<=conf.high, 1, 0)) |>
+    select(estimate, conf.low, conf.high, cover)
+  
+  return(row)
+}
 ```
 
 **DSSM-2: I can conduct common statistical analyses in R.**
@@ -1300,6 +1534,7 @@ ca_childcare |>
 ```{r}
 #| label: dsm-2-1
 # Lab 2 ; Problem 17
+
 species_mod <- aov(data = surveys, weight ~ species)
 summary(species_mod)
 ```
@@ -1309,6 +1544,7 @@ summary(species_mod)
 ```{r}
 #| label: dsm-2-2
 # Challenge 3 ; Problem 3
+
 tab <- table(teacher_evals_comparison$sen_level,
              teacher_evals_comparison$set_level)
 chisq.test(tab)
@@ -1319,6 +1555,7 @@ chisq.test(tab)
 ```{r}
 #| label: dsm-2-3
 # Lab 4 ; Problem 9
+
 reg_mod1 <- lm(mc_infant ~ mhi_2018,
                data = ca_childcare)
 summary(reg_mod1)
@@ -1348,4 +1585,4 @@ Lab 3 Peer Review: "I noticed that question 4 is missing "code" to answer the qu
 
 I'm specifically proud of this peer review I wrote for Lab 3. I pointed out that my partner's code was missing a few parts and suggested using the slice function instead of printing the whole data frame. I also mentioned that their work looked good overall and that I appreciated how they included their ChatGPT transcript. Writing this review helped me learn how to give feedback that's helpful but also positive.
 
-Through the pair programming activites, I got better at explaining my ideas and listening to others. I learned how to ask qustions that help my partner think through their code instead of just giving them the answer. Overall, I became more comfortable working with others, sharing ideas, and improving together.
+Through the pair programming activities, I got better at explaining my ideas and listening to others. I learned how to ask questions that help my partner think through their code instead of just giving them the answer. Overall, I became more comfortable working with others, sharing ideas, and improving together.

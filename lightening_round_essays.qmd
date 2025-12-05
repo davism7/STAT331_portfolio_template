@@ -6,16 +6,22 @@ editor: visual
 
 **Answer each of the following questions with *one sentence* including a brief explanation.**
 
-1. Finish the sentence with another student’s name: "If [Name of Student] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
+1.  Finish the sentence with another student’s name: "If \[Name of Student\] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
+    If Davis Morales doesn't earn an A, then nobody should, because Davis was able to check off all the requirements from the final portfolio checklist. Other than the checklist, Davis was also putting in the effort to improve and revise his work throughout the quarter. Davis was a great teammate to his peers and did a good job advising them when needed.
 
-2. What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
+2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
 
+    The most difficult part of the class for me was graphics using ggplot. The concept was quite easy but I feel like there's more to graphics than just understanding the concepts. You need to display creativity which I believe I lacked in the beginning. Later in the quarter I improved on being more creative and thinking more on how to improve the graphs visually.
 
-3. What was the easiest part of the class for you? Explain why.
+3.  What was the easiest part of the class for you? Explain why.
 
+    The easiest part of the class for me was the data joins. This is usually a concept that takes a while to understand and get used to, but I had previously learned about data joins in my database class. So the concept of data joins was something I already knew prior to this class which made it an easier topic. Although, it was nice to learn how to perform data joins in a different programming language.
 
-4. What part of the class surprised or interested you the most? Explain why.
+4.  What part of the class surprised or interested you the most? Explain why.
 
+    The part of the class that really surprised me was how much I enjoyed the group practice activities in class. Usually I'm not the biggest fan of group work during lectures, but these practice activities really pushed me to think outside of the box and do so quickly. With support of a classmate, It felt nice to have someone to refer to if I didn't understand a certain topic.
 
-5. Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+5.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+
+    One piece of advice that I would give a student is to make sure to always do the readings. Doing the readings before the lecture makes it so much easier for you to understand the lecture and work along with the teacher. By this point you've pretty much done most of your studying and you can confidently work on your assignments without much struggle. Also I would advise students to have fun with the assignments. Being creative and putting effort in your work makes it fun to see a results that actually seems good.
